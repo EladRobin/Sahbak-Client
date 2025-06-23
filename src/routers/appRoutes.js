@@ -5,6 +5,8 @@ import FormHook from '../components/reactHookForm/formHook';
 import Layout from '../layout/layout';
 import Register from '../components/Register';
 import { Login } from '../components/Login';
+import ResetPassword from '../components/ResetPassword';
+import SetNewPassword from '../components/SetNewPassword';
 
 
 const AppRoutes = () => {
@@ -17,7 +19,8 @@ const AppRoutes = () => {
                 <Route path='/myform' element={<From/>}/>
                 <Route path='/register' element={<Register/>} />
                 <Route path='/login' element={<Login/>} />
-
+                <Route path='/resetpassword' element={<ResetPassword/>} />
+                <Route path='/setnewpassword/:token' element={<SetNewPassword/>} />
 
             </Route>
         </Routes>

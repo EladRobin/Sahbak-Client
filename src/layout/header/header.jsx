@@ -35,11 +35,11 @@ const Header = () => {
             </li>
             {!isLoggedIn && (
               <>
-                {/* <li className="nav-item">
-                  <Link className="nav-link active" to="/register">
-                    <FaUserPlus /> הרשמה
+                <li className="nav-item">
+                  <Link className="nav-link active" to="/resertpassword">
+                    <FaUserPlus /> איפוס סיסמה
                   </Link>
-                </li> */}
+                </li>
                 {/* <li className="nav-item">
                   <Link className="nav-link active" to="/login">
                     <FaSignInAlt /> התחברות
