@@ -1,7 +1,7 @@
 // Client/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import FormHook from './reactHookForm/formHook'; // ודא שהנתיב נכון
+import FormHook from './reactHookForm/formHook';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,14 +11,11 @@ export const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', {
+        const res = await axios.post('http://localhost:5000/api/users/login', {
         email,
         password
       });
-
-
       const { token, userId } = res.data;
-
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
       setIsLoggedIn(true);
@@ -73,5 +70,5 @@ export const Login = () => {
     </div>
   );
 };
+
 export default Login;
-// ודא שהנתיב ל-FormHook נכון   
