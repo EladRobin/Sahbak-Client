@@ -1,4 +1,4 @@
-// FormHook.jsx - גרסה מעודכנת עם תמיכה גם למשתמשים ללא טוקן
+// FormHook.jsx - גרסה מעודכנת עם תמיכה לאדמין בלבד לכפתורי עריכה/מחיקה/הוספה
 
 import React, { useState, useRef, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
@@ -16,6 +16,7 @@ const FormHook = () => {
   const [editData, setEditData] = useState({});
   const [newItem, setNewItem] = useState({ name: "", idNumber: "", item: "", sn: "" });
   const [showModal, setShowModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const buttonRefs = useRef({});
 
   const getAuthHeaders = () => {
@@ -36,33 +37,32 @@ const FormHook = () => {
 
   useEffect(() => {
     fetchItems();
+    const adminFlag = localStorage.getItem('isAdmin');
+    setIsAdmin(adminFlag === 'true');
   }, []);
 
-const handleSubmitNewItem = () => {
-  if (!newItem.name.trim() || !newItem.idNumber.trim() || !newItem.item.trim() || !newItem.sn.trim()) {
-    alert("אנא מלא את כל השדות לפני ההוספה");
-    return;
-  }
+  const handleSubmitNewItem = () => {
+    if (!newItem.name.trim() || !newItem.idNumber.trim() || !newItem.item.trim() || !newItem.sn.trim()) {
+      alert("אנא מלא את כל השדות לפני ההוספה");
+      return;
+    }
 
-      const token = localStorage.getItem('token');
-      console.log("Token שנשלח:", token);
-      if (!token || token.length < 30) {
-        alert("התחברות נדרשת. אנא התחבר שוב.");
-        return;
-      }
+    const token = localStorage.getItem('token');
+    if (!token || token.length < 30) {
+      alert("התחברות נדרשת. אנא התחבר שוב.");
+      return;
+    }
 
-
-  axios.post('http://localhost:5000/api/items', newItem, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(() => {
-      fetchItems(); // טען מחדש את כל הפריטים אחרי הוספה
-      setNewItem({ name: "", idNumber: "", item: "", sn: "" });
-      setShowModal(false);
+    axios.post('http://localhost:5000/api/items', newItem, {
+      headers: { Authorization: `Bearer ${token}` }
     })
-    .catch(err => console.error("שגיאה בהוספה:", err.response?.data || err.message));
-};
-
+      .then(() => {
+        fetchItems();
+        setNewItem({ name: "", idNumber: "", item: "", sn: "" });
+        setShowModal(false);
+      })
+      .catch(err => console.error("שגיאה בהוספה:", err.response?.data || err.message));
+  };
 
   const deleteItem = (id) => {
     axios.delete(`http://localhost:5000/api/items/${id}`, {
@@ -131,7 +131,6 @@ const handleSubmitNewItem = () => {
 
   return (
     <div className="container mt-4" style={{ maxWidth: 900 }}>
-      {/* קלט חיפוש וכפתור הוספה */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div style={{ position: 'relative', width: '70%' }}>
           <input
@@ -147,20 +146,21 @@ const handleSubmitNewItem = () => {
             size={20}
           />
         </div>
-        <div
-          style={{ width: '50px', height: '50px', cursor: 'pointer' }}
-          onClick={() => setShowModal(true)}
-        >
-          <DotLottieReact
-            src="https://lottie.host/d41a87e0-7437-4497-9dfc-ad137be10262/yg5jH90ujJ.lottie"
-            loop
-            autoplay
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
+        {isAdmin && (
+          <div
+            style={{ width: '50px', height: '50px', cursor: 'pointer' }}
+            onClick={() => setShowModal(true)}
+          >
+            <DotLottieReact
+              src="https://lottie.host/c835564a-60b7-4125-93f0-e2d340ec061d/ymf1IgNf9R.lottie"
+              loop
+              autoplay
+              style={{ width: '100%', height: '100%' }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* טבלה */}
       <Table responsive bordered hover style={{ backgroundColor: 'white' }}>
         <thead>
           <tr>
@@ -168,7 +168,7 @@ const handleSubmitNewItem = () => {
             <th>ת"ז</th>
             <th>פריט</th>
             <th>SN</th>
-            <th>פעולות</th>
+            {isAdmin && <th>פעולות</th>}
           </tr>
         </thead>
         <tbody>
@@ -179,22 +179,24 @@ const handleSubmitNewItem = () => {
                   <td><input name="name" value={editData.name} onChange={handleEditChange} className="form-control" /></td>
                   <td><input name="idNumber" value={editData.idNumber} onChange={handleEditChange} className="form-control" /></td>
                   <td>
-                    <select name="item" value={editData.item} onChange={handleEditChange} className="form-control">
-                      <option value="">בחר פריט</option>
-                      <option value="מחשב נייח">מחשב נייח</option>
-                      <option value="מחשב נייד">מחשב נייד</option>
-                      <option value="עכבר">עכבר</option>
-                      <option value="ספר">ספר</option>
-                      <option value="אחר">אחר</option>
-                    </select>
+                <select name="item" value={editData.item} onChange={handleEditChange} className="form-control">
+                <option value="">בחר פריט</option>
+                <option value="מחשב נייח">🖥️ מחשב נייח</option>
+                <option value="מחשב נייד">💻 מחשב נייד</option>
+                <option value="עכבר">🖱️ עכבר</option>
+                <option value="ספר">📘 ספר</option>
+                <option value="אחר">📦 אחר</option>
+              </select>
                   </td>
                   <td><input name="sn" value={editData.sn} onChange={handleEditChange} className="form-control" /></td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <button onClick={saveEdit} className="btn btn-success btn-sm">שמור</button>
-                      <button onClick={() => setEditRowId(null)} className="btn btn-secondary btn-sm">ביטול</button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td>
+                      <div className="d-flex gap-2">
+                        <button onClick={saveEdit} className="btn btn-success btn-sm">שמור</button>
+                        <button onClick={() => setEditRowId(null)} className="btn btn-secondary btn-sm">ביטול</button>
+                      </div>
+                    </td>
+                  )}
                 </>
               ) : (
                 <>
@@ -202,12 +204,14 @@ const handleSubmitNewItem = () => {
                   <td>{item.idNumber}</td>
                   <td>{item.item}</td>
                   <td>{item.sn}</td>
-                  <td>
-                    <button className="btn btn-outline-secondary" onClick={() => toggleDropdown(item._id)}
-                      ref={(el) => (buttonRefs.current[item._id] = el)}>
-                      <FaArrowRight />
-                    </button>
-                  </td>
+                  {isAdmin && (
+                    <td>
+                      <button className="btn btn-outline-secondary" onClick={() => toggleDropdown(item._id)}
+                        ref={(el) => (buttonRefs.current[item._id] = el)}>
+                        <FaArrowRight />
+                      </button>
+                    </td>
+                  )}
                 </>
               )}
             </tr>
@@ -215,8 +219,7 @@ const handleSubmitNewItem = () => {
         </tbody>
       </Table>
 
-      {/* תפריט פעולות */}
-      {dropdownOpenId !== null && (
+      {isAdmin && dropdownOpenId !== null && (
         <ul className="dropdown-menu show shadow"
           style={{ position: 'fixed', top: menuPosition.top + 5, left: menuPosition.left, zIndex: 1050 }}>
           <li><button className="dropdown-item" onClick={() => startEdit(items.find(i => i._id === dropdownOpenId))}>ערוך</button></li>
@@ -224,8 +227,7 @@ const handleSubmitNewItem = () => {
         </ul>
       )}
 
-      {/* מודאל הוספה */}
-      {showModal && (
+      {isAdmin && showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">

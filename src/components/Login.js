@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import FormHook from './reactHookForm/formHook'; // תוודא שהנתיב נכון!
 
+
+
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,10 +17,12 @@ const handleLogin = async () => {
       password,
     });
 
-    const { token, userId } = res.data;
+    const { token, userId, isAdmin } = res.data; // קולט גם isAdmin מהשרת
 
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
+    localStorage.setItem('isAdmin', isAdmin); // ← חדש: שמור את הסטטוס
+
     setIsLoggedIn(true);
     setError('');
   } catch (err) {
@@ -26,6 +30,7 @@ const handleLogin = async () => {
     setError('אימייל או סיסמה שגויים');
   }
 };
+
 
 
   const handleLogout = () => {
