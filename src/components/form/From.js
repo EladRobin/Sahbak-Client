@@ -5,12 +5,12 @@ import Table from 'react-bootstrap/Table';
 import { useNavigate } from 'react-router-dom';
 
 const MyItems = () => {
-  const [items, setItems] = useState([]);
-  const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const navigate = useNavigate();
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    if (!userId) {
+    const idNumber = localStorage.getItem('userId');
+    if (!idNumber) {
       navigate('/myform');
       return;
     }
@@ -21,16 +21,17 @@ const MyItems = () => {
       }
     })
       .then(res => {
-        const filtered = res.data.filter(item => item.idNumber === userId);
+        const filtered = res.data.filter(item => item.idNumber === idNumber);
         setItems(filtered);
       })
       .catch(err => {
         console.error("שגיאה בטעינת פריטים:", err);
       });
-  }, [userId, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('userId');
+    localStorage.removeItem('token');
     navigate('/myform');
   };
 
