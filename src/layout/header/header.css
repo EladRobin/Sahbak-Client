@@ -1,0 +1,6 @@
+/* בקובץ ה-CSS שלך או בתוך תגית <style> */
+.navbar-nav { /* או כל קלאס אחר שתיתן ל-<ul> שלך */
+  display: flex;
+  justify-content: flex-end; /* דוחף את כל הפריטים לימין */
+  /* או: justify-content: space-between; אם אתה רוצה לדחוף רק פריט אחד ספציפי לימין */
+}

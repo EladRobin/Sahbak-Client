@@ -1,0 +1,11 @@
+.form{
+    max-width: 500px;
+    min-height: 500px;
+    margin: 0 auto;
+    border: 1px solid black;
+    margin-top: 50px;
+    padding: 12px;
+}
+.error{
+    color: red;
+}
