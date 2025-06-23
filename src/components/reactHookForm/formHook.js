@@ -1,10 +1,9 @@
-// FormHook.jsx - גרסה מעודכנת עם תמיכה לאדמין בלבד לכפתורי עריכה/מחיקה/הוספה
-
 import React, { useState, useRef, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
 import { FaArrowRight } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 
 const FormHook = () => {
@@ -19,6 +18,8 @@ const FormHook = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const buttonRefs = useRef({});
 
+  const isLoggedIn = !!localStorage.getItem('token');
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -28,6 +29,7 @@ const FormHook = () => {
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    // אם משתמש מחובר - שולף את כל הפריטים, אחרת לפי userId אם אין טוקן
     const url = userId && !token ? `http://localhost:5000/api/items/by-id/${userId}` : `http://localhost:5000/api/items`;
 
     axios.get(url, { headers })
@@ -36,20 +38,22 @@ const FormHook = () => {
   };
 
   useEffect(() => {
-    fetchItems();
-    const adminFlag = localStorage.getItem('isAdmin');
-    setIsAdmin(adminFlag === 'true');
-  }, []);
+    if (isLoggedIn) {
+      fetchItems();
+      const adminFlag = localStorage.getItem('isAdmin');
+      setIsAdmin(adminFlag === 'true');
+    }
+  }, [isLoggedIn]);
 
   const handleSubmitNewItem = () => {
-    if (!newItem.name.trim() || !newItem.idNumber.trim() || !newItem.item.trim() || !newItem.sn.trim()) {
-      alert("אנא מלא את כל השדות לפני ההוספה");
+    if (!newItem.name || !newItem.idNumber || !newItem.item || !newItem.sn) {
+      alert("אנא מלא את כל השדות");
       return;
     }
 
     const token = localStorage.getItem('token');
     if (!token || token.length < 30) {
-      alert("התחברות נדרשת. אנא התחבר שוב.");
+      alert("התחברות נדרשת");
       return;
     }
 
@@ -82,8 +86,8 @@ const FormHook = () => {
   };
 
   const saveEdit = () => {
-    if (!editData.name.trim() || !editData.idNumber.trim() || !editData.item.trim() || !editData.sn.trim()) {
-      alert("אנא מלא את כל השדות לפני השמירה");
+    if (!editData.name || !editData.idNumber || !editData.item || !editData.sn) {
+      alert("אנא מלא את כל השדות");
       return;
     }
 
@@ -129,8 +133,38 @@ const FormHook = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // אם המשתמש לא מחובר - מציג הודעה עם כפתורי התחברות והרשמה
+  if (!isLoggedIn) {
+    return (
+      <div className="container mt-5">
+        <div className="row align-items-center">
+          {/* אנימציה - צד ימין */}
+          <div className="col-md-6 d-flex justify-content-center">
+            <DotLottieReact
+              src="https://lottie.host/c992c888-8edc-4b3d-99dd-1f2f989b3087/B2dJIbQnT1.lottie"
+              autoplay
+              loop
+              style={{ width: 300, height: 300 }}
+            />
+          </div>
+
+          {/* כפתורי התחברות והרשמה - צד שמאל, יותר במרכז */}
+          <div className="col-md-6 d-flex flex-column align-items-center">
+            <h4 className="mb-4 text-center">אנא התחבר כדי לצפות בציוד האישי</h4>
+            <div>
+              <Button variant="danger" className="me-2" onClick={() => window.location.href = '/login'}>Login</Button>
+              <Button variant="danger" onClick={() => window.location.href = '/register'}>Create Account</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // אם מחובר - מציג טבלה עם הפריטים
   return (
     <div className="container mt-4" style={{ maxWidth: 900 }}>
+      {/* שורת חיפוש ואייקון הוספה */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div style={{ position: 'relative', width: '70%' }}>
           <input
@@ -161,6 +195,7 @@ const FormHook = () => {
         )}
       </div>
 
+      {/* טבלה */}
       <Table responsive bordered hover style={{ backgroundColor: 'white' }}>
         <thead>
           <tr>
@@ -179,14 +214,14 @@ const FormHook = () => {
                   <td><input name="name" value={editData.name} onChange={handleEditChange} className="form-control" /></td>
                   <td><input name="idNumber" value={editData.idNumber} onChange={handleEditChange} className="form-control" /></td>
                   <td>
-                <select name="item" value={editData.item} onChange={handleEditChange} className="form-control">
-                <option value="">בחר פריט</option>
-                <option value="מחשב נייח">🖥️ מחשב נייח</option>
-                <option value="מחשב נייד">💻 מחשב נייד</option>
-                <option value="עכבר">🖱️ עכבר</option>
-                <option value="ספר">📘 ספר</option>
-                <option value="אחר">📦 אחר</option>
-              </select>
+                    <select name="item" value={editData.item} onChange={handleEditChange} className="form-control">
+                      <option value="">בחר פריט</option>
+                      <option value="מחשב נייח">🖥️ מחשב נייח</option>
+                      <option value="מחשב נייד">💻 מחשב נייד</option>
+                      <option value="עכבר">🖱️ עכבר</option>
+                      <option value="ספר">📘 ספר</option>
+                      <option value="אחר">📦 אחר</option>
+                    </select>
                   </td>
                   <td><input name="sn" value={editData.sn} onChange={handleEditChange} className="form-control" /></td>
                   {isAdmin && (
@@ -219,7 +254,8 @@ const FormHook = () => {
         </tbody>
       </Table>
 
-      {isAdmin && dropdownOpenId !== null && (
+      {/* תפריט פעולות */}
+      {isAdmin && dropdownOpenId && (
         <ul className="dropdown-menu show shadow"
           style={{ position: 'fixed', top: menuPosition.top + 5, left: menuPosition.left, zIndex: 1050 }}>
           <li><button className="dropdown-item" onClick={() => startEdit(items.find(i => i._id === dropdownOpenId))}>ערוך</button></li>
@@ -227,6 +263,7 @@ const FormHook = () => {
         </ul>
       )}
 
+      {/* מודל הוספה */}
       {isAdmin && showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -238,16 +275,16 @@ const FormHook = () => {
               <div className="modal-body">
                 <input type="text" placeholder="שם מלא" className="form-control mb-2"
                   value={newItem.name} onChange={e => setNewItem(prev => ({ ...prev, name: e.target.value }))} />
-                <input type="text" placeholder='ת"ז' className="form-control mb-2"
+                <input type="text" placeholder="תז" className="form-control mb-2"
                   value={newItem.idNumber} onChange={e => setNewItem(prev => ({ ...prev, idNumber: e.target.value }))} />
                 <select className="form-control mb-2" value={newItem.item}
                   onChange={e => setNewItem(prev => ({ ...prev, item: e.target.value }))}>
                   <option value="">בחר פריט</option>
-                  <option value="מחשב נייח">מחשב נייח</option>
-                  <option value="מחשב נייד">מחשב נייד</option>
-                  <option value="עכבר">עכבר</option>
-                  <option value="ספר">ספר</option>
-                  <option value="אחר">אחר</option>
+                  <option value="מחשב נייח">🖥️ מחשב נייח</option>
+                  <option value="מחשב נייד">💻 מחשב נייד</option>
+                  <option value="עכבר">🖱️ עכבר</option>
+                  <option value="ספר">📘 ספר</option>
+                  <option value="אחר">📦 אחר</option>
                 </select>
                 <input type="text" placeholder="SN" className="form-control mb-2"
                   value={newItem.sn} onChange={e => setNewItem(prev => ({ ...prev, sn: e.target.value }))} />

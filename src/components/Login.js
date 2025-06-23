@@ -1,42 +1,31 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import FormHook from './reactHookForm/formHook'; // תוודא שהנתיב נכון!
-
-
+import { useOutletContext } from 'react-router-dom';
+import FormHook from './reactHookForm/formHook';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const { setIsLoggedIn } = useOutletContext();
 
-const handleLogin = async () => {
-  try {
-    const res = await axios.post('http://localhost:5000/api/users/login', {
-      email,
-      password,
-    });
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/users/login', { email, password });
+      const { token, userId, isAdmin } = res.data;
 
-    const { token, userId, isAdmin } = res.data; // קולט גם isAdmin מהשרת
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('isAdmin', isAdmin);
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('userId', userId);
-    localStorage.setItem('isAdmin', isAdmin); // ← חדש: שמור את הסטטוס
-
-    setIsLoggedIn(true);
-    setError('');
-  } catch (err) {
-    console.error("שגיאה בהתחברות:", err.response?.data || err.message);
-    setError('אימייל או סיסמה שגויים');
-  }
-};
-
-
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
+      setIsLoggedIn(true);
+      setError('');
+    } catch (err) {
+      setError('אימייל או סיסמה שגויים');
+    }
   };
+
+  const isLoggedIn = !!localStorage.getItem('token');
 
   if (!isLoggedIn) {
     return (
@@ -66,13 +55,7 @@ const handleLogin = async () => {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>הציוד שרשום עליך</h4>
-        <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>
-          התנתק
-        </button>
-      </div>
-      {/* פשוט מציגים את הטבלה שלך כאן */}
+      <h4>הציוד שרשום עליך</h4>
       <FormHook />
     </div>
   );
