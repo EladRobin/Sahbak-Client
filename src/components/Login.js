@@ -1,6 +1,7 @@
+// Client/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import FormHook from './reactHookForm/formHook'; // תוודא שהנתיב נכון!
+import FormHook from './reactHookForm/formHook'; // ודא שהנתיב נכון
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,28 +9,28 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
 
-const handleLogin = async () => {
-  try {
-    const res = await axios.post('http://localhost:5000/api/auth/login', {
-      email,
-      password,
-    });
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+      });
 
-    const { token, userId } = res.data;
+      const { token, userId } = res.data;
 
-    localStorage.setItem('token', token);
-    localStorage.setItem('userId', userId);
-    setIsLoggedIn(true);
-    setError('');
-  } catch (err) {
-    console.error("שגיאה בהתחברות:", err.response?.data || err.message);
-    setError('אימייל או סיסמה שגויים');
-  }
-};
-
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', userId);
+      setIsLoggedIn(true);
+      setError('');
+    } catch (err) {
+      console.error('שגיאה בהתחברות:', err.response?.data || err.message);
+      setError('אימייל או סיסמה שגויים');
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     setIsLoggedIn(false);
   };
 
@@ -67,8 +68,9 @@ const handleLogin = async () => {
           התנתק
         </button>
       </div>
-      {/* פשוט מציגים את הטבלה שלך כאן */}
       <FormHook />
     </div>
   );
 };
+export default Login;
+// ודא שהנתיב ל-FormHook נכון   
