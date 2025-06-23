@@ -1,3 +1,4 @@
+// Client/components/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -19,6 +20,8 @@ const Register = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/users/register', formData);
+
+
       setMessage('נרשמת בהצלחה!');
       setFormData({ email: '', fullName: '', password: '' });
     } catch (err) {
@@ -65,3 +68,4 @@ const Register = () => {
 };
 
 export default Register;
+//     <div className="text-center"> 
