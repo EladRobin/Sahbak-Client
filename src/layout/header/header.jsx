@@ -17,7 +17,14 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#FFDAB9' }}>
       <div className="container">
+                <img
+      src="https://sdmntprwestus2.oaiusercontent.com/files/00000000-782c-61f8-95c8-b2ba1f17aa26/raw?se=2025-06-24T16%3A37%3A22Z&sp=r&sv=2024-08-04&sr=b&scid=8ffef453-0da4-5e43-817c-119d05a853ff&skoid=30ec2761-8f41-44db-b282-7a0f8809659b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-24T13%3A45%3A33Z&ske=2025-06-25T13%3A45%3A33Z&sks=b&skv=2024-08-04&sig=6678VT%2B%2BQjknavmey19vMepJ2B/fjIAdzrd07i/NSuA%3D"
+      alt="לוגו צופיה"
+      style={{ height: '60px' }}
+    />
         <Link className="navbar-brand" to="/">סחבק</Link>
+
+ 
 
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
           data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -26,8 +33,8 @@ const Header = () => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
+          <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
+              <li className="nav-item">
               <Link className="nav-link active" to="/">דף הבית</Link>
             </li>
             <li className="nav-item">
@@ -40,11 +47,11 @@ const Header = () => {
                     <FaUserPlus /> איפוס סיסמה
                   </Link>
                 </li>
-                {/* <li className="nav-item">
+                <li className="nav-item">
                   <Link className="nav-link active" to="/login">
-                    <FaSignInAlt /> התחברות
+                    <FaSignInAlt /> אדמין
                   </Link>
-                </li> */}
+                </li>
               </>
             )}
           </ul>
