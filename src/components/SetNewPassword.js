@@ -1,4 +1,3 @@
-// SetNewPassword.jsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -31,10 +30,10 @@ const SetNewPassword = () => {
     try {
       await axios.post(`http://localhost:5000/api/users/set-new-password`, {
         token,
-        password
+        password,
       });
       setMessage('הסיסמה עודכנה בהצלחה!');
-      setTimeout(() => navigate('/login'), 3000); // מעבר אחרי 3 שניות
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'שגיאה בעדכון הסיסמה');
     }

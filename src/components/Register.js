@@ -7,10 +7,14 @@ import { Link } from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    fullName: '',
-    password: ''
-  });
+  email: '',
+  fullName: '',
+  tz: '',
+  phone: '',
+  class: '',
+  password: ''
+});
+
 
   const [message, setMessage] = useState('');
 
@@ -20,15 +24,23 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('http://localhost:5000/api/users/register', formData);
-      setMessage('נרשמת בהצלחה!');
-      setFormData({ email: '', fullName: '', password: '' });
-    } catch (err) {
-      setMessage('שגיאה בהרשמה: ' + (err.response?.data?.message || err.message));
-    }
-  };
+  e.preventDefault();
+  try {
+    const res = await axios.post('http://localhost:5000/api/users/register', formData);
+    setMessage('נרשמת בהצלחה!');
+    setFormData({
+      email: '',
+      fullName: '',
+      tz: '',
+      phone: '',
+      class: '',
+      password: ''
+    });
+  } catch (err) {
+    setMessage('שגיאה בהרשמה: ' + (err.response?.data?.message || err.message));
+  }
+};
+
 
   return (
     <div className="container-fluid vh-100 d-flex align-items-center">
@@ -45,36 +57,62 @@ const Register = () => {
         <div className="col-md-6 d-flex align-items-center justify-content-center">
           <div style={{ maxWidth: 400, width: '100%' }}>
             <h2 className="mb-4 text-center">הרשמה</h2>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="email"
-                name="email"
-                className="form-control mb-2"
-                placeholder="אימייל"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="fullName"
-                className="form-control mb-2"
-                placeholder="שם מלא"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="password"
-                name="password"
-                className="form-control mb-3"
-                placeholder="סיסמה"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              <button type="submit" className="btn btn-primary w-100">הרשם</button>
-            </form>
+      <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            name="email"
+            className="form-control mb-2"
+            placeholder="אימייל"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="fullName"
+            className="form-control mb-2"
+            placeholder="שם מלא"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="tz"
+            className="form-control mb-2"
+            placeholder="תעודת זהות"
+            value={formData.tz}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="phone"
+            className="form-control mb-2"
+            placeholder="טלפון (אופציונלי)"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="class"
+            className="form-control mb-2"
+            placeholder="כיתה (אופציונלי)"
+            value={formData.class}
+            onChange={handleChange}
+          />
+          <input
+            type="password"
+            name="password"
+            className="form-control mb-3"
+            placeholder="סיסמה"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <button type="submit" className="btn btn-primary w-100">הרשם</button>
+        </form>
+
 
             {/* כאן מוסיפים קישור לעמוד התחברות */}
             <div className="mt-3 text-center">

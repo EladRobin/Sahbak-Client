@@ -8,6 +8,9 @@ import { Login } from '../components/Login';
 import ResetPassword from '../components/ResetPassword';
 import SetNewPassword from '../components/SetNewPassword';
 
+import Profile from '../components/Profile';
+
+
 
 const AppRoutes = () => {
     
@@ -19,8 +22,9 @@ const AppRoutes = () => {
                 <Route path='/myform' element={<From/>}/>
                 <Route path='/register' element={<Register/>} />
                 <Route path='/login' element={<Login/>} />
-                <Route path='/resetpassword' element={<ResetPassword/>} />
-                <Route path='/setnewpassword/:token' element={<SetNewPassword/>} />
+                <Route path='/reset-password' element={<ResetPassword/>} />
+                <Route path='/set-new-password/:token' element={<SetNewPassword />} />
+                <Route path='/profile' element={<Profile />} />
 
             </Route>
         </Routes>

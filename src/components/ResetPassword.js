@@ -1,3 +1,4 @@
+// 1. ResetPassword.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
@@ -18,11 +19,10 @@ const ResetPassword = () => {
     }
 
     try {
-      // נניח שיש API לאיפוס סיסמה בכתובת זו
-      await axios.post('http://localhost:5000/api/users/reset-password', { email });
-      setMessage('נשלחה בקשה לאיפוס סיסמה, בדוק את המייל שלך.');
+      const response = await axios.post('http://localhost:5000/api/users/reset-password', { email });
+      setMessage(response.data.message || 'קישור נשלח');
     } catch (err) {
-      setError(err.response?.data?.message || 'אירעה שגיאה בשליחת הבקשה');
+      setError(err.response?.data?.message || 'שגיאה בשליחת הבקשה');
     }
   };
 

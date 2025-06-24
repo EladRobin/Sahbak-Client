@@ -20,6 +20,14 @@ const FormHook = () => {
 
   const isLoggedIn = !!localStorage.getItem('token');
 
+  const itemIcons = {
+    "מחשב נייח": "🖥️",
+    "מחשב נייד": "💻",
+    "עכבר": "🖱️",
+    "ספר": "📘",
+    "אחר": "📦",
+  };
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -29,7 +37,6 @@ const FormHook = () => {
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    // אם משתמש מחובר - שולף את כל הפריטים, אחרת לפי userId אם אין טוקן
     const url = userId && !token ? `http://localhost:5000/api/items/by-id/${userId}` : `http://localhost:5000/api/items`;
 
     axios.get(url, { headers })
@@ -133,12 +140,10 @@ const FormHook = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // אם המשתמש לא מחובר - מציג הודעה עם כפתורי התחברות והרשמה
   if (!isLoggedIn) {
     return (
       <div className="container mt-5">
         <div className="row align-items-center">
-          {/* אנימציה - צד ימין */}
           <div className="col-md-6 d-flex justify-content-center">
             <DotLottieReact
               src="https://lottie.host/c992c888-8edc-4b3d-99dd-1f2f989b3087/B2dJIbQnT1.lottie"
@@ -147,8 +152,6 @@ const FormHook = () => {
               style={{ width: 300, height: 300 }}
             />
           </div>
-
-          {/* כפתורי התחברות והרשמה - צד שמאל, יותר במרכז */}
           <div className="col-md-6 d-flex flex-column align-items-center">
             <h4 className="mb-4 text-center">אנא התחבר כדי לצפות בציוד האישי</h4>
             <div>
@@ -161,10 +164,8 @@ const FormHook = () => {
     );
   }
 
-  // אם מחובר - מציג טבלה עם הפריטים
   return (
     <div className="container mt-4" style={{ maxWidth: 900 }}>
-      {/* שורת חיפוש ואייקון הוספה */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div style={{ position: 'relative', width: '70%' }}>
           <input
@@ -181,10 +182,7 @@ const FormHook = () => {
           />
         </div>
         {isAdmin && (
-          <div
-            style={{ width: '50px', height: '50px', cursor: 'pointer' }}
-            onClick={() => setShowModal(true)}
-          >
+          <div style={{ width: '50px', height: '50px', cursor: 'pointer' }} onClick={() => setShowModal(true)}>
             <DotLottieReact
               src="https://lottie.host/c835564a-60b7-4125-93f0-e2d340ec061d/ymf1IgNf9R.lottie"
               loop
@@ -195,7 +193,6 @@ const FormHook = () => {
         )}
       </div>
 
-      {/* טבלה */}
       <Table responsive bordered hover style={{ backgroundColor: 'white' }}>
         <thead>
           <tr>
@@ -237,7 +234,7 @@ const FormHook = () => {
                 <>
                   <td>{item.name}</td>
                   <td>{item.idNumber}</td>
-                  <td>{item.item}</td>
+                  <td>{itemIcons[item.item] || ""} {item.item}</td>
                   <td>{item.sn}</td>
                   {isAdmin && (
                     <td>
@@ -254,7 +251,6 @@ const FormHook = () => {
         </tbody>
       </Table>
 
-      {/* תפריט פעולות */}
       {isAdmin && dropdownOpenId && (
         <ul className="dropdown-menu show shadow"
           style={{ position: 'fixed', top: menuPosition.top + 5, left: menuPosition.left, zIndex: 1050 }}>
@@ -263,7 +259,6 @@ const FormHook = () => {
         </ul>
       )}
 
-      {/* מודל הוספה */}
       {isAdmin && showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -302,3 +297,4 @@ const FormHook = () => {
 };
 
 export default FormHook;
+
