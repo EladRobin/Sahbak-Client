@@ -41,16 +41,17 @@ const Header = () => {
     <Link className="nav-link active" to="/">דף הבית</Link>
   </li>
 
-  <li className="nav-item">
-    <Link className="nav-link active" to="/login">אדמין</Link>
-  </li>
+
+ 
 
   {isLoggedIn && (
     <>
       <li className="nav-item">
         <Link className="nav-link active" to="/myform">עמוד משתמש</Link>
       </li>
-
+  <li className="nav-item">
+    <Link className="nav-link active" to="/Admin">אדמין</Link>
+  </li>
     </>
   )}
 </ul>
