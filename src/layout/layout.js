@@ -24,7 +24,7 @@ const Layout = () => {
         <Outlet context={{ setIsLoggedIn }} />
       </main>
       <footer className="bg-gray-800 text-white p-4 text-center colorrgb(31, 21, 13)">
-        <p style={{ color: 'rgb(31, 21, 13)' }}>© {new Date().getFullYear()} כל הזכויות שמורות &nbsp;|&nbsp; אתר זה הוא למטרות הדגמה בלבד</p>
+        <p style={{ color: 'rgb(31, 21, 13)' }}>© {new Date().getFullYear()}  כל הזכויות שמורות לאלעד רובינוב&nbsp;|&nbsp; </p>
         <div className="mt-2">
           <a href="/privacy" className="underline hover:text-gray-300 mx-2">מדיניות פרטיות</a>
           <a href="/terms" className="underline hover:text-gray-300 mx-2">תנאי שימוש</a>

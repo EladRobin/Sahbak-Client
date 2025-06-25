@@ -36,35 +36,25 @@ const Header = () => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-              <Link className="nav-link active" to="/">דף הבית</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link active" to="/myform">עמוד משתמש</Link>
-            </li>
-                
-            {!isLoggedIn && (
-              <>
-              
-                <li className="nav-item">
-                  <Link className="nav-link active" to="/reset-password">
-                    <FaUserPlus /> איפוס סיסמה
-                  </Link>
-                </li>
-                       <li className="nav-item">
-                  <Link className="nav-link active" to="/set-new-password/:token">
-                    <FaUserPlus /> איפוס סיסמה חדשה
-                  </Link>
-                </li>
-                {/* <li className="nav-item">
-                  <Link className="nav-link active" to="/login">
-                    <FaSignInAlt /> אדמין
-                  </Link>
-                </li> */}
-              </>
-            )}
-          </ul>
+ <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
+  <li className="nav-item">
+    <Link className="nav-link active" to="/">דף הבית</Link>
+  </li>
+
+  <li className="nav-item">
+    <Link className="nav-link active" to="/login">אדמין</Link>
+  </li>
+
+  {isLoggedIn && (
+    <>
+      <li className="nav-item">
+        <Link className="nav-link active" to="/myform">עמוד משתמש</Link>
+      </li>
+
+    </>
+  )}
+</ul>
+
 
           {/* צד ימין של ההדר */}
           {isLoggedIn && (
