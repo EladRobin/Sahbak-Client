@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';  // <-- הוספתי useNavigate
 import FormHook from './reactHookForm/formHook';
+import Button from 'react-bootstrap/Button';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { setIsLoggedIn } = useOutletContext();
+  const navigate = useNavigate();  // <-- ניווט בין דפים
 
   const handleLogin = async () => {
     try {
@@ -16,7 +18,7 @@ export const Login = () => {
 
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
-      localStorage.setItem('isAdmin', isAdmin);
+      localStorage.setItem('isAdmin', isAdmin.toString());
 
       setIsLoggedIn(true);
       setError('');
@@ -46,9 +48,16 @@ export const Login = () => {
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-        <button className="btn btn-primary w-100" onClick={handleLogin}>
+        <Button className="w-100 mb-3" onClick={handleLogin}>
           התחבר
-        </button>
+        </Button>
+
+        {/* כפתור "שכחתי סיסמה" */}
+        <div className="text-center">
+          <Button variant="link" onClick={() => navigate('/reset-password')} style={{ textDecoration: 'none' }}>
+            שכחתי סיסמה
+          </Button>
+        </div>
       </div>
     );
   }

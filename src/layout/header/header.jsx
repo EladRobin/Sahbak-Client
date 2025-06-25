@@ -46,6 +46,7 @@ const Header = () => {
                 
             {!isLoggedIn && (
               <>
+              
                 <li className="nav-item">
                   <Link className="nav-link active" to="/reset-password">
                     <FaUserPlus /> איפוס סיסמה

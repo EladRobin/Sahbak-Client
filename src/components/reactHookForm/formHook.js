@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Table from 'react-bootstrap/Table';
+import React, { useState, useRef, useEffect } from "react";
+import Table from "react-bootstrap/Table";
 import { FaArrowRight } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import Button from 'react-bootstrap/Button';
-import axios from 'axios';
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import Button from "react-bootstrap/Button";
+import axios from "axios";
 
 const FormHook = () => {
   const [items, setItems] = useState([]);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -18,37 +19,55 @@ const FormHook = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const buttonRefs = useRef({});
 
-  const isLoggedIn = !!localStorage.getItem('token');
+  const isLoggedIn = !!localStorage.getItem("token");
 
   const itemIcons = {
     "מחשב נייח": "🖥️",
     "מחשב נייד": "💻",
     "עכבר": "🖱️",
     "ספר": "📘",
-    "אחר": "📦",
+    אחר: "📦",
   };
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
   const fetchItems = () => {
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const url = userId && !token ? `http://localhost:5000/api/items/by-id/${userId}` : `http://localhost:5000/api/items`;
-
-    axios.get(url, { headers })
-      .then(res => setItems(res.data))
-      .catch(err => console.error("שגיאה בשליפה:", err));
+    const headers = getAuthHeaders();
+    axios
+      .get("http://localhost:5000/api/items", { headers })
+      .then((res) => setItems(res.data))
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          alert("הסשן שלך פג. אנא התחבר מחדש.");
+          localStorage.clear();
+          window.location.href = "/login";
+        } else {
+          console.error("שגיאה בשליפה:", err);
+        }
+      });
   };
 
   useEffect(() => {
     if (isLoggedIn) {
       fetchItems();
-      const adminFlag = localStorage.getItem('isAdmin');
-      setIsAdmin(adminFlag === 'true');
+      const adminFlag = localStorage.getItem("isAdmin");
+      setIsAdmin(adminFlag === "true");
+
+      axios
+        .get("http://localhost:5000/api/users", { headers: getAuthHeaders() })
+        .then((res) => setUsers(res.data))
+        .catch((err) => {
+          if (err.response && err.response.status === 401) {
+            alert("הסשן שלך פג. אנא התחבר מחדש.");
+            localStorage.clear();
+            window.location.href = "/login";
+          } else {
+            console.error("שגיאה בטעינת משתמשים:", err);
+          }
+        });
     }
   }, [isLoggedIn]);
 
@@ -58,32 +77,44 @@ const FormHook = () => {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token || token.length < 30) {
-      alert("התחברות נדרשת");
-      return;
-    }
-
-    axios.post('http://localhost:5000/api/items', newItem, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    axios
+      .post("http://localhost:5000/api/items", newItem, {
+        headers: getAuthHeaders(),
+      })
       .then(() => {
         fetchItems();
         setNewItem({ name: "", idNumber: "", item: "", sn: "" });
         setShowModal(false);
       })
-      .catch(err => console.error("שגיאה בהוספה:", err.response?.data || err.message));
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          alert("הסשן שלך פג. אנא התחבר מחדש.");
+          localStorage.clear();
+          window.location.href = "/login";
+        } else {
+          console.error("שגיאה בהוספה:", err.response?.data || err.message);
+        }
+      });
   };
 
   const deleteItem = (id) => {
-    axios.delete(`http://localhost:5000/api/items/${id}`, {
-      headers: getAuthHeaders()
-    })
+    axios
+      .delete(`http://localhost:5000/api/items/${id}`, {
+        headers: getAuthHeaders(),
+      })
       .then(() => {
         fetchItems();
         setDropdownOpenId(null);
       })
-      .catch(err => console.error("שגיאה במחיקה:", err));
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          alert("הסשן שלך פג. אנא התחבר מחדש.");
+          localStorage.clear();
+          window.location.href = "/login";
+        } else {
+          console.error("שגיאה במחיקה:", err);
+        }
+      });
   };
 
   const startEdit = (item) => {
@@ -98,15 +129,29 @@ const FormHook = () => {
       return;
     }
 
-    axios.put(`http://localhost:5000/api/items/${editRowId}`, editData, {
-      headers: getAuthHeaders()
-    })
+    axios
+      .put(`http://localhost:5000/api/items/${editRowId}`, editData, {
+        headers: getAuthHeaders(),
+      })
       .then(() => {
         fetchItems();
         setEditRowId(null);
         setDropdownOpenId(null);
       })
-      .catch(err => console.error("שגיאה בעדכון:", err));
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          alert("הסשן שלך פג. אנא התחבר מחדש.");
+          localStorage.clear();
+          window.location.href = "/login";
+        } else {
+          console.error("שגיאה בעדכון:", err);
+        }
+      });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
   const toggleDropdown = (id) => {
@@ -118,82 +163,68 @@ const FormHook = () => {
     }
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const filteredItems = items.filter(item =>
-    item.name.includes(searchTerm) ||
-    item.idNumber.includes(searchTerm) ||
-    item.item.includes(searchTerm) ||
-    item.sn.includes(searchTerm)
-  );
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const isInsideButton = Object.values(buttonRefs.current).some(ref => ref && ref.contains(event.target));
-      const isInsideDropdown = event.target.closest('.dropdown-menu');
-      if (!isInsideButton && !isInsideDropdown) setDropdownOpenId(null);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const filteredItems = items.filter((item) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(term) ||
+      item.idNumber.toLowerCase().includes(term) ||
+      item.item.toLowerCase().includes(term) ||
+      item.sn.toLowerCase().includes(term)
+    );
+  });
 
   if (!isLoggedIn) {
     return (
-      <div className="container mt-5">
-        <div className="row align-items-center">
-          <div className="col-md-6 d-flex justify-content-center">
-            <DotLottieReact
-              src="https://lottie.host/c992c888-8edc-4b3d-99dd-1f2f989b3087/B2dJIbQnT1.lottie"
-              autoplay
-              loop
-              style={{ width: 300, height: 300 }}
-            />
-          </div>
-          <div className="col-md-6 d-flex flex-column align-items-center">
-            <h4 className="mb-4 text-center">אנא התחבר כדי לצפות בציוד האישי</h4>
-            <div>
-              <Button variant="danger" className="me-2" onClick={() => window.location.href = '/login'}>Login</Button>
-              <Button variant="danger" onClick={() => window.location.href = '/register'}>Create Account</Button>
-            </div>
-          </div>
+      <div className="container mt-5 text-center">
+        <DotLottieReact
+          src="https://lottie.host/c992c888-8edc-4b3d-99dd-1f2f989b3087/B2dJIbQnT1.lottie"
+          autoplay
+          loop
+          style={{ width: 300, height: 300, margin: "auto" }}
+        />
+        <h4 className="mb-4">אנא התחבר כדי לצפות בציוד האישי</h4>
+        <div>
+          <Button variant="danger" className="me-2" onClick={() => (window.location.href = "/login")}>
+            התחבר
+          </Button>
+          <Button variant="danger" onClick={() => (window.location.href = "/register")}>
+            צור חשבון
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mt-4" style={{ maxWidth: 900 }}>
+    <div className="container mt-4" style={{ maxWidth: 900, position: "relative" }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <div style={{ position: 'relative', width: '70%' }}>
+        <div style={{ position: "relative", width: "70%" }}>
           <input
             type="text"
             className="form-control"
             placeholder="חפש..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ paddingRight: '2rem' }}
+            style={{ paddingRight: "2rem" }}
           />
           <CiSearch
-            style={{ position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#888' }}
+            style={{ position: "absolute", right: "15px", top: "50%", transform: "translateY(-50%)" }}
             size={20}
           />
         </div>
         {isAdmin && (
-          <div style={{ width: '50px', height: '50px', cursor: 'pointer' }} onClick={() => setShowModal(true)}>
+          <div style={{ width: "50px", height: "50px", cursor: "pointer" }} onClick={() => setShowModal(true)}>
             <DotLottieReact
               src="https://lottie.host/c835564a-60b7-4125-93f0-e2d340ec061d/ymf1IgNf9R.lottie"
               loop
               autoplay
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: "100%", height: "100%" }}
             />
           </div>
         )}
       </div>
 
-      <Table responsive bordered hover style={{ backgroundColor: 'white' }}>
+      <Table responsive bordered hover>
         <thead>
           <tr>
             <th>שם מלא</th>
@@ -204,14 +235,33 @@ const FormHook = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredItems.map(item => (
+          {filteredItems.map((item) => (
             <tr key={item._id}>
               {editRowId === item._id ? (
                 <>
-                  <td><input name="name" value={editData.name} onChange={handleEditChange} className="form-control" /></td>
-                  <td><input name="idNumber" value={editData.idNumber} onChange={handleEditChange} className="form-control" /></td>
                   <td>
-                    <select name="item" value={editData.item} onChange={handleEditChange} className="form-control">
+                    <input
+                      name="name"
+                      value={editData.name}
+                      onChange={handleEditChange}
+                      className="form-control"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      name="idNumber"
+                      value={editData.idNumber}
+                      onChange={handleEditChange}
+                      className="form-control"
+                    />
+                  </td>
+                  <td>
+                    <select
+                      name="item"
+                      value={editData.item}
+                      onChange={handleEditChange}
+                      className="form-control"
+                    >
                       <option value="">בחר פריט</option>
                       <option value="מחשב נייח">🖥️ מחשב נייח</option>
                       <option value="מחשב נייד">💻 מחשב נייד</option>
@@ -220,28 +270,67 @@ const FormHook = () => {
                       <option value="אחר">📦 אחר</option>
                     </select>
                   </td>
-                  <td><input name="sn" value={editData.sn} onChange={handleEditChange} className="form-control" /></td>
-                  {isAdmin && (
-                    <td>
-                      <div className="d-flex gap-2">
-                        <button onClick={saveEdit} className="btn btn-success btn-sm">שמור</button>
-                        <button onClick={() => setEditRowId(null)} className="btn btn-secondary btn-sm">ביטול</button>
-                      </div>
-                    </td>
-                  )}
+                  <td>
+                    <input
+                      name="sn"
+                      value={editData.sn}
+                      onChange={handleEditChange}
+                      className="form-control"
+                    />
+                  </td>
+                  <td>
+                    <button onClick={saveEdit} className="btn btn-success btn-sm">
+                      שמור
+                    </button>
+                  </td>
                 </>
               ) : (
                 <>
                   <td>{item.name}</td>
                   <td>{item.idNumber}</td>
-                  <td>{itemIcons[item.item] || ""} {item.item}</td>
+                  <td>
+                    {itemIcons[item.item]} {item.item}
+                  </td>
                   <td>{item.sn}</td>
                   {isAdmin && (
-                    <td>
-                      <button className="btn btn-outline-secondary" onClick={() => toggleDropdown(item._id)}
-                        ref={(el) => (buttonRefs.current[item._id] = el)}>
+                    <td style={{ position: "relative" }}>
+                      <button
+                        ref={(el) => (buttonRefs.current[item._id] = el)}
+                        onClick={() => toggleDropdown(item._id)}
+                        className="btn btn-outline-secondary"
+                      >
                         <FaArrowRight />
                       </button>
+                      {dropdownOpenId === item._id && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: menuPosition.top,
+                            left: menuPosition.left,
+                            background: "white",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
+                            zIndex: 1000,
+                            padding: "8px",
+                            minWidth: "120px",
+                          }}
+                        >
+                          <button
+                            className="btn btn-sm btn-primary mb-2 w-100"
+                            onClick={() => startEdit(item)}
+                          >
+                            ערוך
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger w-100"
+                            onClick={() => {
+                              if (window.confirm("האם למחוק את הפריט?")) deleteItem(item._id);
+                            }}
+                          >
+                            מחק
+                          </button>
+                        </div>
+                      )}
                     </td>
                   )}
                 </>
@@ -250,14 +339,6 @@ const FormHook = () => {
           ))}
         </tbody>
       </Table>
-
-      {isAdmin && dropdownOpenId && (
-        <ul className="dropdown-menu show shadow"
-          style={{ position: 'fixed', top: menuPosition.top + 5, left: menuPosition.left, zIndex: 1050 }}>
-          <li><button className="dropdown-item" onClick={() => startEdit(items.find(i => i._id === dropdownOpenId))}>ערוך</button></li>
-          <li><button className="dropdown-item" onClick={() => deleteItem(dropdownOpenId)}>מחק</button></li>
-        </ul>
-      )}
 
       {isAdmin && showModal && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -268,12 +349,40 @@ const FormHook = () => {
                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
               <div className="modal-body">
-                <input type="text" placeholder="שם מלא" className="form-control mb-2"
-                  value={newItem.name} onChange={e => setNewItem(prev => ({ ...prev, name: e.target.value }))} />
-                <input type="text" placeholder="תז" className="form-control mb-2"
-                  value={newItem.idNumber} onChange={e => setNewItem(prev => ({ ...prev, idNumber: e.target.value }))} />
-                <select className="form-control mb-2" value={newItem.item}
-                  onChange={e => setNewItem(prev => ({ ...prev, item: e.target.value }))}>
+                <select
+                  className="form-control mb-2"
+                  value={newItem.idNumber}
+                  onChange={(e) => {
+                    const selectedTz = e.target.value;
+                    const selectedUser = users.find((user) => user.tz === selectedTz);
+                    if (selectedUser) {
+                      setNewItem((prev) => ({
+                        ...prev,
+                        idNumber: selectedUser.tz,
+                        name: selectedUser.fullName,
+                      }));
+                    } else {
+                      setNewItem((prev) => ({
+                        ...prev,
+                        idNumber: "",
+                        name: "",
+                      }));
+                    }
+                  }}
+                >
+                  <option value="">בחר משתמש</option>
+                  {users.map((user) => (
+                    <option key={user.tz} value={user.tz}>
+                      {user.fullName} - {user.tz}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  className="form-control mb-2"
+                  value={newItem.item}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, item: e.target.value }))}
+                >
                   <option value="">בחר פריט</option>
                   <option value="מחשב נייח">🖥️ מחשב נייח</option>
                   <option value="מחשב נייד">💻 מחשב נייד</option>
@@ -281,12 +390,22 @@ const FormHook = () => {
                   <option value="ספר">📘 ספר</option>
                   <option value="אחר">📦 אחר</option>
                 </select>
-                <input type="text" placeholder="SN" className="form-control mb-2"
-                  value={newItem.sn} onChange={e => setNewItem(prev => ({ ...prev, sn: e.target.value }))} />
+
+                <input
+                  type="text"
+                  placeholder="SN"
+                  className="form-control mb-2"
+                  value={newItem.sn}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, sn: e.target.value }))}
+                />
               </div>
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>סגור</button>
-                <button className="btn btn-primary" onClick={handleSubmitNewItem}>הוסף פריט</button>
+                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  סגור
+                </button>
+                <button className="btn btn-primary" onClick={handleSubmitNewItem}>
+                  הוסף פריט
+                </button>
               </div>
             </div>
           </div>
@@ -297,4 +416,3 @@ const FormHook = () => {
 };
 
 export default FormHook;
-
