@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import Table from "react-bootstrap/Table";
 import { FaArrowRight } from "react-icons/fa";
-import { CiSearch } from "react-icons/ci";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const FormHook = () => {
   const [items, setItems] = useState([]);
@@ -173,6 +174,56 @@ const FormHook = () => {
     );
   });
 
+  // פונקציית ייצוא לאקסל
+  const exportToExcel = () => {
+    if (filteredItems.length === 0) {
+      alert("אין נתונים לייצוא");
+      return;
+    }
+
+    const dataToExport = filteredItems.map(({ name, idNumber, item, sn }) => ({
+      "שם מלא": name,
+      "תעודת זהות": idNumber,
+      פריט: item,
+      "מספר סידורי (SN)": sn,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ציוד");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "exported_items.xlsx");
+  };
+
+  // פונקציה לסימון פריט כתקול
+const markItemAsDefective = (id) => {
+  // מוצא את הפריט מתוך המערך items (הקיים בקומפוננטה)
+  const itemToUpdate = items.find((item) => item._id === id);
+  if (!itemToUpdate) return;
+
+  const updatedData = {
+    name: itemToUpdate.name,
+    idNumber: itemToUpdate.idNumber,
+    item: itemToUpdate.item,
+    sn: itemToUpdate.sn,
+    status: 'defective',  // הוספת הסטטוס החדש
+  };
+
+  axios.put(`http://localhost:5000/api/items/${id}`, updatedData, {
+    headers: getAuthHeaders(),
+  })
+  .then(() => {
+    fetchItems();
+  })
+  .catch(err => {
+    console.error("שגיאה בסימון כתקול:", err);
+  });
+};
+
+
+
   if (!isLoggedIn) {
     return (
       <div className="container mt-5 text-center">
@@ -197,21 +248,18 @@ const FormHook = () => {
 
   return (
     <div className="container mt-4" style={{ maxWidth: 900, position: "relative" }}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div style={{ position: "relative", width: "70%" }}>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="חפש..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ paddingRight: "2rem" }}
-          />
-          <CiSearch
-            style={{ position: "absolute", right: "15px", top: "50%", transform: "translateY(-50%)" }}
-            size={20}
-          />
-        </div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="חפש..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ paddingRight: "2rem", width: "70%" }}
+        />
+        <button className="btn btn-success ms-2" onClick={exportToExcel}>
+          ייצא לאקסל
+        </button>
         {isAdmin && (
           <div style={{ width: "50px", height: "50px", cursor: "pointer" }} onClick={() => setShowModal(true)}>
             <DotLottieReact
@@ -236,7 +284,7 @@ const FormHook = () => {
         </thead>
         <tbody>
           {filteredItems.map((item) => (
-            <tr key={item._id}>
+            <tr key={item._id} style={item.status === "defective" ? { backgroundColor: "#f8d7da" } : {}}>
               {editRowId === item._id ? (
                 <>
                   <td>
@@ -305,16 +353,23 @@ const FormHook = () => {
                         <div
                           style={{
                             position: "absolute",
-                            top: menuPosition.top,
-                            left: menuPosition.left,
+                            top: "100%",
+                            left: 0,
                             background: "white",
                             border: "1px solid #ccc",
                             borderRadius: "4px",
                             zIndex: 1000,
                             padding: "8px",
-                            minWidth: "120px",
+                            minWidth: "140px",
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
                           }}
                         >
+                          <button
+                            className="btn btn-sm btn-warning mb-2 w-100"
+                            onClick={() => markItemAsDefective(item._id)}
+                          >
+                            סמן כתקול
+                          </button>
                           <button
                             className="btn btn-sm btn-primary mb-2 w-100"
                             onClick={() => startEdit(item)}

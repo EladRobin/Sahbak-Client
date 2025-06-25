@@ -1,0 +1,19 @@
+Admin.css
+.chart-container .MuiPieArc-root {
+  transition: transform 0.3s ease;
+}
+
+.chart-container .MuiPieArc-root:hover {
+  transform: scale(1.08);
+  cursor: pointer;
+}
+/* Admin.css */
+.pie-slice {
+  transition: transform 0.3s ease;
+  transform-origin: center;
+}
+
+.pie-slice:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+}

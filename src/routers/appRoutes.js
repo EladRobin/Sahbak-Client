@@ -12,6 +12,7 @@ import Profile from '../components/Profile';
 
 // import EquipmentPieChart from '../ComponetsAdmin/EquipmentPieChart';  
 import Admin from '../ComponetsAdmin/Admin';
+import DefectiveItems from '../ComponetsAdmin/DefectiveItems';
 
 const AppRoutes = () => {
   return (
@@ -30,6 +31,7 @@ const AppRoutes = () => {
           {/* צד מנהל */}
           {/* <Route path='/EquipmentPieChart' element={<EquipmentPieChart />} /> */}
           <Route path='/Admin' element={<Admin />} />
+          <Route path='/admin/defective-items' element={<DefectiveItems />} />
         </Route>
       </Routes>
     </Router>

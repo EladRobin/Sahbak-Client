@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PieChart } from '@mui/x-charts/PieChart';
+import { Tooltip } from '@mui/material';
+import './Admin.css';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -20,7 +22,6 @@ const Admin = () => {
     const fetchCounts = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log("token from localStorage:", token); // בדיקת טוקן
         if (!token) {
           setError('אין טוקן התחברות. אנא התחבר.');
           setLoading(false);
@@ -37,7 +38,7 @@ const Admin = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('שגיאה בטעינת נתונים');
+        setError('שגיאה בטעינת נתונים: ' + (error.response?.data?.message || error.message));
         setLoading(false);
       }
     };
@@ -60,9 +61,29 @@ const Admin = () => {
 
       {!loading && !error && chartData.length > 0 && (
         <PieChart
-          series={[{ data: chartData }]}
+          series={[
+            {
+              data: chartData,
+              highlightScope: { faded: 'global', highlighted: 'item' }, // הובר יפה
+              faded: { additionalRadius: -15, color: 'gray' }, // פריטים לא פעילים מתעמעמים
+            },
+          ]}
+          slotProps={{
+            legend: {
+              direction: 'column',
+              position: { vertical: 'middle', horizontal: 'right' },
+            },
+          }}
+          tooltip={{
+            trigger: 'item',
+            render: ({ datum }) => (
+              <Tooltip title={`${datum.label}: ${datum.value} פריטים`} open>
+                <span></span>
+              </Tooltip>
+            )
+          }}
           height={300}
-          width={300}
+          width={400}
           valueFormatter={item => `${item.value} פריטים`}
         />
       )}

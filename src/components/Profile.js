@@ -33,6 +33,9 @@ const ProfileCard = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // timestamp ל-cache busting תמונה
+  const [imgTimestamp, setImgTimestamp] = useState(Date.now());
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -54,7 +57,7 @@ const ProfileCard = () => {
     if (userId) fetchUser();
   }, [userId]);
 
-  // העלאת תמונה - כמו קודם
+  // העלאת תמונה
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -69,6 +72,7 @@ const ProfileCard = () => {
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
       setUser((prev) => ({ ...prev, profileImage: res.data.imageUrl || res.data.imagePath }));
+      setImgTimestamp(Date.now()); // עדכון הטיימסטמפ לטעינה מחדש של התמונה
       setSuccessMsg('תמונת הפרופיל עודכנה בהצלחה');
     } catch (err) {
       console.error('שגיאה בהעלאת תמונה:', err);
@@ -109,7 +113,7 @@ const ProfileCard = () => {
     );
 
   const profileImageUrl = user.profileImage
-    ? `http://localhost:5000${user.profileImage}`
+    ? `http://localhost:5000${user.profileImage}?t=${imgTimestamp}`
     : 'https://via.placeholder.com/100?text=No+Image';
 
   return (
